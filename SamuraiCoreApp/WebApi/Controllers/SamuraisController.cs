@@ -27,20 +27,12 @@ namespace WebApi.Controllers
 
         // GET: api/Samurais
         [HttpGet]
-        public async Task<ActionResult<Samurai[]>> GetSamurais(string name)
+        public async Task<ActionResult<Samurai[]>> GetSamurais()
         {
             try
             {
-                if (!string.IsNullOrEmpty(name))
-                {
-                    var results = await _context.Samurais.FirstOrDefaultAsync(s => s.Name == name);
-                    return Ok(results);
-                }
-                else {
-                    var results = await _context.Samurais.ToArrayAsync();
-                    return Ok(results);
-                }
-                
+                var samuraiWithQuotes = await _context.Samurais.Include(s => s.Quotes).ToListAsync();
+                return Ok(samuraiWithQuotes);
             }
             catch (Exception)
             {
@@ -68,18 +60,52 @@ namespace WebApi.Controllers
         {
             try
             {
-                var samurai = new Samurai { Name = input.Name };
-
-                var battle = new Battle
-                {
-                    Name = input.BattleName,
-                    StartDate = DateTime.Parse(input.BattleStartDate),
-                    EndDate = DateTime.Parse(input.BattleEndDate),
+                var samurai = new Samurai {
+                    Name = input.Name,
+                    Quotes = input.Quotes
                 };
 
-                _context.AddRange(samurai, battle);
+                _context.Samurais.Add(samurai);
                 await _context.SaveChangesAsync();
 
+                return Ok();
+            }
+            catch (Exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failed");
+            }
+        }
+
+        //add new quotes
+        [HttpPost("{id}/quotes")]
+        public async Task<IActionResult> PostNewQuotes(int id, List<string> quotes)
+        {
+            try
+            {
+                //While EF is tracking the excisting object
+                var query = _context.Samurais.Where(s => s.Id == id);
+                var samurai = await query.FirstOrDefaultAsync();
+                if (samurai == null)
+                {
+                    return NotFound();
+                }
+                foreach (string quote in quotes)
+                {
+                    samurai.Quotes.Add(new Quote
+                    {
+                        Text = quote
+                    });
+                }
+
+                //EF is not tracking excisting object
+                //var quote = new Quote
+                //{
+                //    Text = "Now that I saved you, will you feed me dinner?",
+                //    SamuraiId = id
+                //};
+                //await _context.Quotes.AddAsync(quote);
+
+                await _context.SaveChangesAsync();
                 return Ok();
             }
             catch (Exception)

@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using SamuraiCoreApp.Data;
 
 namespace WebApi
@@ -22,9 +24,12 @@ namespace WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-            var connection = Configuration.GetConnectionString("SamuraiConnection");
+            services
+                .AddMvc()
+                .AddJsonOptions(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
+            var connection = Configuration.GetConnectionString("SamuraiConnection");
             //Everytime I use SamuraiContext the commands that it execute on the database will be output to the console windows
             //SamuraiContext will use "SqlServer" provider with connection string
             services.AddDbContext<SamuraiContext>(optionsBuilder => {
@@ -32,7 +37,7 @@ namespace WebApi
                 .EnableSensitiveDataLogging(true)
                 .UseSqlServer(connection);
             });
-
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
