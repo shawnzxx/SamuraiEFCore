@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SamuraiCoreApp.Data;
 using SaumraiCoreApp.Domain;
 using WebApi.Models;
@@ -16,10 +17,12 @@ namespace WebApi.Controllers
     public class SamuraisController : ControllerBase
     {
         private readonly SamuraiContext _context;
+        private readonly ILogger<SamuraisController> _logger;
 
-        public SamuraisController(SamuraiContext context)
+        public SamuraisController(SamuraiContext context, ILogger<SamuraisController> logger)
         {
             this._context = context;
+            this._logger = logger;
         }
 
         // GET: api/Samurais
@@ -49,6 +52,7 @@ namespace WebApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Samurai>> GetById(int id)
         {
+            _logger.LogWarning("Hello World In Values Controller");
             var query = _context.Samurais.Where(s => s.Id == id);
             var result = await query.FirstOrDefaultAsync();
             if (result == null)
