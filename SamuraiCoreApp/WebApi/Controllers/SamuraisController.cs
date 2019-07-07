@@ -31,8 +31,31 @@ namespace WebApi.Controllers
         {
             try
             {
-                var samuraiWithQuotes = await _context.Samurais.Include(s => s.Quotes).ToListAsync();
-                return Ok(samuraiWithQuotes);
+                //Inculde you can't do filtering
+                //var samuraiWithQuotes = await _context.Samurais.Include(s => s.Quotes).ToListAsync();
+
+                //use projection for selected fields
+                //var samuraiWithHappyQuote = await _context.Samurais
+                //    .Select(s => new
+                //    {
+                //        s.Id,
+                //        s.Name,
+                //        HappyQuotes = s.Quotes.Where(q => q.Text.Contains("happy"))
+                //    })
+                //    .ToListAsync();
+                //var result = samuraiWithHappyQuote;
+
+                //Filtering children currentlly requires multiple queries:
+                //do two queries, 2nd one filtering out the none happy quote, EF can figure out realted DBSet inside the memory
+                //var samurais = _context.Samurais.ToList();
+                //var happyQuotes = _context.Quotes.Where(q => q.Text.Contains("happy")).ToList();
+
+                //only get the samurai with happy quotes
+                var samurais = await _context.Samurais
+                    .Where(s => s.Quotes.Any(q => q.Text.Contains("happy")))
+                    .ToListAsync();
+
+                return Ok(samurais);
             }
             catch (Exception)
             {
@@ -42,11 +65,34 @@ namespace WebApi.Controllers
 
         // GET: api/Samurais/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Samurai>> GetById(int id)
+        public async Task<ActionResult<Samurai>> GetById(int id, bool simplify = false)
         {
-            _logger.LogWarning("Hello World In Values Controller");
-            var query = _context.Samurais.Where(s => s.Id == id);
-            var result = await query.FirstOrDefaultAsync();
+            dynamic result = null;
+            //_logger.LogWarning("Hello World In Values Controller");
+            if (simplify)
+            {
+                
+                //some properties with quote count
+                //result = await _context.Samurais
+                //    .Where(s => s.Id == id)
+                //    .Select(s => new { s.Name, s.Quotes.Count, s.Quotes })
+                //    .FirstOrDefaultAsync();
+
+                //select projection filtering
+                result = await _context.Samurais
+                    .Where(s => s.Id == id)
+                    .Select(s => new { s.Name, TotalQuotes = s.Quotes.Count, HappyQuotes = s.Quotes.Where(q => q.Text.Contains("happy"))})
+                    .FirstOrDefaultAsync();
+                    
+            }
+            else {
+                //You can eager load related data or load after the fact
+                result = _context.Samurais
+                    .Where(s => s.Id == id)
+                    .Include(s => s.Quotes)
+                    .FirstOrDefaultAsync();
+            }
+
             if (result == null)
             {
                 return NotFound();
