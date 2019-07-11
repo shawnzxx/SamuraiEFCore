@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using SamuraiCoreApp.Data;
-using SamuraiCoreApp.Data.Services;
-using SaumraiCoreApp.Domain;
+using WebApi.Contexts;
+using WebApi.Entities;
 using WebApi.Models;
+using WebApi.Services;
 
 namespace WebApi.Controllers
 {

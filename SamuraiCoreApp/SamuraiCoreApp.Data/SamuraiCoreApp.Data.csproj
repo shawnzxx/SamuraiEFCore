@@ -9,8 +9,4 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\SaumraiCoreApp.Domain\SaumraiCoreApp.Domain.csproj" />
-  </ItemGroup>
-
 </Project>

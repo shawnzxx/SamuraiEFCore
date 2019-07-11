@@ -1,16 +1,12 @@
-﻿using System;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using SamuraiCoreApp.Data;
-using SamuraiCoreApp.Data.Services;
 using Swashbuckle.AspNetCore.Swagger;
+using WebApi.Contexts;
+using WebApi.Services;
 
 namespace WebApi
 {

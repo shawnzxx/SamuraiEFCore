@@ -12,9 +12,4 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\SamuraiCoreApp.Data\SamuraiCoreApp.Data.csproj" />
-    <ProjectReference Include="..\SaumraiCoreApp.Domain\SaumraiCoreApp.Domain.csproj" />
-  </ItemGroup>
-
 </Project>
