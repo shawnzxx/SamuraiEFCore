@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using SamuraiCoreApp.Data;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace WebApi
 {
@@ -28,6 +29,11 @@ namespace WebApi
                 .AddMvc()
                 .AddJsonOptions(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
+            });
 
             var connection = Configuration.GetConnectionString("SamuraiConnection");
             //Everytime I use SamuraiContext the commands that it execute on the database will be output to the console windows
@@ -55,6 +61,14 @@ namespace WebApi
 
             app.UseHttpsRedirection();
             app.UseMvc();
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            });
+
         }
     }
 }

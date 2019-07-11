@@ -13,7 +13,10 @@ using WebApi.Models;
 namespace WebApi.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
+    //we are not use the latest ApiController attribute because swashbuckle need explicit attribute bindings
+    //https://github.com/domaindrivendev/Swashbuckle.AspNetCore
+    //What is ApiController attribute: https://www.strathweb.com/2018/02/exploring-the-apicontrollerattribute-and-its-features-for-asp-net-core-mvc-2-1/
+    //[ApiController] 
     public class SamuraisController : ControllerBase
     {
         private readonly SamuraiContext _context;
@@ -65,7 +68,7 @@ namespace WebApi.Controllers
 
         // GET: api/Samurais/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Samurai>> GetById(int id, bool simplify = false)
+        public async Task<ActionResult<Samurai>> GetById(int id, [FromQuery]bool simplify = false)
         {
             dynamic result = null;
             //_logger.LogWarning("Hello World In Values Controller");
@@ -102,7 +105,7 @@ namespace WebApi.Controllers
 
         // POST: api/Samurais
         [HttpPost]
-        public async Task<IActionResult> Post(SamuraiModel input)
+        public async Task<IActionResult> Post([FromBody]SamuraiModel input)
         {
             try
             {
@@ -124,7 +127,7 @@ namespace WebApi.Controllers
 
         //add new quotes
         [HttpPost("{id}/quotes")]
-        public async Task<IActionResult> PostNewQuotes(int id, List<string> quotes)
+        public async Task<IActionResult> PostNewQuotes(int id, [FromBody] List<string> quotes)
         {
             try
             {
@@ -197,7 +200,7 @@ namespace WebApi.Controllers
 
         // Delete: api/Samurais?str=baba
         [HttpDelete()]
-        public async Task<IActionResult> DeleteMany(string str)
+        public async Task<IActionResult> DeleteMany([FromQuery]string str)
         {
             var samurais = _context.Samurais.Where(s => s.Name.Contains(str));
             _context.Samurais.RemoveRange(samurais);
