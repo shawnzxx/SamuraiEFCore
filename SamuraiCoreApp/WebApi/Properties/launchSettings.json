@@ -20,7 +20,7 @@
     "WebApi": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "api/values",
+      "launchUrl": "api/samurais",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

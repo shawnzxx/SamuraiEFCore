@@ -7,58 +7,36 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SamuraiCoreApp.Data;
+using SamuraiCoreApp.Data.Services;
 using SaumraiCoreApp.Domain;
 using WebApi.Models;
 
 namespace WebApi.Controllers
 {
     [Route("api/[controller]")]
-    //we are not use the latest ApiController attribute because swashbuckle need explicit attribute bindings
-    //https://github.com/domaindrivendev/Swashbuckle.AspNetCore
-    //What is ApiController attribute: https://www.strathweb.com/2018/02/exploring-the-apicontrollerattribute-and-its-features-for-asp-net-core-mvc-2-1/
-    //[ApiController] 
+    [ApiController] //What is ApiController attribute: https://www.strathweb.com/2018/02/exploring-the-apicontrollerattribute-and-its-features-for-asp-net-core-mvc-2-1/
     public class SamuraisController : ControllerBase
     {
         private readonly SamuraiContext _context;
         private readonly ILogger<SamuraisController> _logger;
+        private readonly ISamuraiRepository _samuraiRepository;
 
-        public SamuraisController(SamuraiContext context, ILogger<SamuraisController> logger)
+        public SamuraisController(SamuraiContext context, ILogger<SamuraisController> logger, ISamuraiRepository samuraiRepository)
         {
             this._context = context;
             this._logger = logger;
+            this._samuraiRepository = samuraiRepository 
+                ?? throw new ArgumentNullException(nameof(samuraiRepository));
         }
 
         // GET: api/Samurais
         [HttpGet]
-        public async Task<ActionResult<Samurai[]>> GetSamurais()
+        public async Task<ActionResult<IEnumerable<Samurai>>> GetSamurais()
         {
             try
             {
-                //Inculde you can't do filtering
-                //var samuraiWithQuotes = await _context.Samurais.Include(s => s.Quotes).ToListAsync();
-
-                //use projection for selected fields
-                //var samuraiWithHappyQuote = await _context.Samurais
-                //    .Select(s => new
-                //    {
-                //        s.Id,
-                //        s.Name,
-                //        HappyQuotes = s.Quotes.Where(q => q.Text.Contains("happy"))
-                //    })
-                //    .ToListAsync();
-                //var result = samuraiWithHappyQuote;
-
-                //Filtering children currentlly requires multiple queries:
-                //do two queries, 2nd one filtering out the none happy quote, EF can figure out realted DBSet inside the memory
-                //var samurais = _context.Samurais.ToList();
-                //var happyQuotes = _context.Quotes.Where(q => q.Text.Contains("happy")).ToList();
-
-                //only get the samurai with happy quotes
-                var samurais = await _context.Samurais
-                    .Where(s => s.Quotes.Any(q => q.Text.Contains("happy")))
-                    .ToListAsync();
-
-                return Ok(samurais);
+                var samuraiEntities = await _samuraiRepository.GetSamuraisAsync();
+                return Ok(samuraiEntities);
             }
             catch (Exception)
             {
@@ -68,39 +46,22 @@ namespace WebApi.Controllers
 
         // GET: api/Samurais/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Samurai>> GetById(int id, [FromQuery]bool simplify = false)
+        public async Task<ActionResult<Samurai>> GetSamuraiById(int id)
         {
-            dynamic result = null;
-            //_logger.LogWarning("Hello World In Values Controller");
-            if (simplify)
+            try
             {
-                
-                //some properties with quote count
-                //result = await _context.Samurais
-                //    .Where(s => s.Id == id)
-                //    .Select(s => new { s.Name, s.Quotes.Count, s.Quotes })
-                //    .FirstOrDefaultAsync();
-
-                //select projection filtering
-                result = await _context.Samurais
-                    .Where(s => s.Id == id)
-                    .Select(s => new { s.Name, TotalQuotes = s.Quotes.Count, HappyQuotes = s.Quotes.Where(q => q.Text.Contains("happy"))})
-                    .FirstOrDefaultAsync();
-                    
+                var result = await _samuraiRepository.GetSamuraiAsync(id);
+                if (result == null)
+                {
+                    return NotFound();
+                }
+                return Ok(result);
             }
-            else {
-                //You can eager load related data or load after the fact
-                result = _context.Samurais
-                    .Where(s => s.Id == id)
-                    .Include(s => s.Quotes)
-                    .FirstOrDefaultAsync();
-            }
-
-            if (result == null)
+            catch (Exception)
             {
-                return NotFound();
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failed");
             }
-            return Ok(result);
+            
         }
 
         // POST: api/Samurais

@@ -16,7 +16,9 @@ namespace SaumraiCoreApp.Domain
         [MaxLength(150)]
         public string Text { get; set; }
 
+        //Foreign key back to Samurais Table
         public int SamuraiId { get; set; }
+        //Navigation property for code easy navigate back t0 Samuai object
         public Samurai Samurai { get; set; }
     }
 }

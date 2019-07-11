@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using SamuraiCoreApp.Data;
+using SamuraiCoreApp.Data.Services;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace WebApi
@@ -25,25 +26,28 @@ namespace WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services
-                .AddMvc()
-                .AddJsonOptions(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
             });
 
+            services
+                .AddMvc()
+                .AddJsonOptions(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            // register the DbContext on the container, getting the connection string from
+            // appSettings (note: use this during development; in a production environment,
+            // it's better to store the connection string in an environment variable)
+            // Everytime I use SamuraiContext the commands that it execute on the database will be output to the console windows
             var connection = Configuration.GetConnectionString("SamuraiConnection");
-            //Everytime I use SamuraiContext the commands that it execute on the database will be output to the console windows
-            //SamuraiContext will use "SqlServer" provider with connection string
             services.AddDbContext<SamuraiContext>(optionsBuilder => {
                 optionsBuilder
                 .EnableSensitiveDataLogging(true)
-                .UseSqlServer(connection);
+                .UseSqlServer(connection); // use "SqlServer" provider with connection string
             });
-            
+
+            services.AddScoped<ISamuraiRepository, SamuraiRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

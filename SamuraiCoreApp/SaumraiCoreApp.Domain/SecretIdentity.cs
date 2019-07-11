@@ -12,7 +12,7 @@ namespace SaumraiCoreApp.Domain
 
         //foreigner key property
         public int SamuraiId { get; set; }
-
+        //Navigation property
         public Samurai Samurai { get; set; }
     }
 }
