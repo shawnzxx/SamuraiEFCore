@@ -44,6 +44,7 @@ namespace WebApi
             });
 
             services.AddScoped<ISamuraiRepository, SamuraiRepository>();
+            services.AddScoped<IQuoteRepository, QuoteRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
