@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using WebApi.Contexts;
 using WebApi.Entities;
+using WebApi.Filters;
 using WebApi.Services;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -32,6 +33,7 @@ namespace WebApi.Controllers
 
         // GET: api/samurais/2/quotes
         [HttpGet]
+        [QuotesResultFilter]
         public async Task<ActionResult<IEnumerable<Quote>>> GetQuotes(int samuraiId)
         {
             try
@@ -47,6 +49,7 @@ namespace WebApi.Controllers
 
         // GET: api/samurais/2/quotes/2
         [HttpGet("{quoteId}")]
+        [QuoteResultFilter]
         public async Task<ActionResult<Samurai>> GetSamuraiById(int samuraiId, int quoteId)
         {
             try
