@@ -36,12 +36,12 @@ namespace WebApi.Controllers
 
         // GET: api/samurais
         [HttpGet]
-        public async Task<ActionResult<SamuraiOutputModel[]>> GetSamurais()
+        public async Task<IActionResult> GetSamurais()
         {
             try
             {
                 var samuraiEntities = await _samuraiRepository.GetSamuraisAsync();
-                return _mapper.Map<SamuraiOutputModel[]>(samuraiEntities);
+                return Ok(_mapper.Map<SamuraiOutputModel[]>(samuraiEntities));
             }
             catch (Exception ex)
             {
@@ -51,7 +51,7 @@ namespace WebApi.Controllers
 
         // GET: api/samurais/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<SamuraiOutputModel>> GetSamuraiById(int id)
+        public async Task<IActionResult> GetSamuraiById(int id)
         {
             try
             {
@@ -60,8 +60,8 @@ namespace WebApi.Controllers
                 {
                     return NotFound();
                 }
-                
-                return _mapper.Map<SamuraiOutputModel>(samurai);
+
+                return Ok(_mapper.Map<SamuraiOutputModel>(samurai));
             }
             catch (Exception)
             {

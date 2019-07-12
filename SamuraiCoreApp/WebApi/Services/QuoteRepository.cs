@@ -70,5 +70,13 @@ namespace WebApi.Services
             return await _context.Quotes.Where(q => quoteIds.Contains(q.Id))
                 .Include(q => q.Samurai).ToListAsync();
         }
+
+        public IEnumerable<Quote> GetQuotes()
+        {
+            //delay database query 2 seconds to test sync concurrent call
+            _context.Database.ExecuteSqlCommand("WAITFOR DELAY '00:00:02';");
+
+            return _context.Quotes.Include(q => q.Samurai).ToList();
+        }
     }
 }

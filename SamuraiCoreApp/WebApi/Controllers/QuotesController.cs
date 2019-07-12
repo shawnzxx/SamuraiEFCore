@@ -41,12 +41,12 @@ namespace WebApi.Controllers
         // GET: api/quotes
         [HttpGet]
         [QuotesResultFilter]
-        public async Task<ActionResult<IEnumerable<Quote>>> GetQuotes()
+        public async Task<IActionResult> GetQuotes()
         {
             try
             {
-                var quotes = await _quoteRepository.GetQuotesAsync();
-                return Ok(quotes);
+                var quoteEntities = await _quoteRepository.GetQuotesAsync();
+                return Ok(quoteEntities);
             }
             catch (Exception)
             {
@@ -58,16 +58,16 @@ namespace WebApi.Controllers
         [HttpGet]
         [QuoteResultFilter]
         [Route("{id}", Name ="GetQuote")]
-        public async Task<ActionResult<Samurai>> GetSamuraiById(int id)
+        public async Task<IActionResult> GetQuote(int id)
         {
             try
             {
-                var quite = await _quoteRepository.GetQuoteAsync(id);
-                if (quite == null)
+                var quoteEntity = await _quoteRepository.GetQuoteAsync(id);
+                if (quoteEntity == null)
                 {
                     return NotFound();
                 }
-                return Ok(quite);
+                return Ok(quoteEntity);
             }
             catch (Exception)
             {
