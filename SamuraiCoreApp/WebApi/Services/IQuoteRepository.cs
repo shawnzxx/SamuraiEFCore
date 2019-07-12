@@ -9,10 +9,13 @@ namespace WebApi.Services
 {
     public interface IQuoteRepository : IDisposable
     {
-        Task<IEnumerable<Quote>> GetQuotesAsync(int samuraiId);
+        //get all quotes in db
+        Task<IEnumerable<Quote>> GetQuotesAsync();
+        //get quotes collection by pasing ids array
+        Task<IEnumerable<Quote>> GetQuotesAsync(IEnumerable<int> quoteIds);
 
-        Task<Quote> GetQuoteAsync(int samuraiId, int quoteId);
-
+        Task<Quote> GetQuoteAsync(int quoteId);
+ 
         void AddQuote(Quote quote);
 
         Task<bool> SaveChangeAsync();

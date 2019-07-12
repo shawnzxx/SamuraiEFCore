@@ -17,7 +17,7 @@ using WebApi.Services;
 
 namespace WebApi.Controllers
 {
-    [Route("api/samurais/{samuraiId}/[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class QuotesController : ControllerBase
     {
@@ -38,14 +38,14 @@ namespace WebApi.Controllers
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        // GET: api/samurais/2/quotes
+        // GET: api/quotes
         [HttpGet]
         [QuotesResultFilter]
-        public async Task<ActionResult<IEnumerable<Quote>>> GetQuotes(int samuraiId)
+        public async Task<ActionResult<IEnumerable<Quote>>> GetQuotes()
         {
             try
             {
-                var quotes = await _quoteRepository.GetQuotesAsync(samuraiId);
+                var quotes = await _quoteRepository.GetQuotesAsync();
                 return Ok(quotes);
             }
             catch (Exception)
@@ -54,15 +54,15 @@ namespace WebApi.Controllers
             }
         }
 
-        // GET: api/samurais/2/quotes/2
+        // GET: api/quotes/2
         [HttpGet]
         [QuoteResultFilter]
-        [Route("{quoteId}", Name ="GetQuote")]
-        public async Task<ActionResult<Samurai>> GetSamuraiById(int samuraiId, int quoteId)
+        [Route("{id}", Name ="GetQuote")]
+        public async Task<ActionResult<Samurai>> GetSamuraiById(int id)
         {
             try
             {
-                var quite = await _quoteRepository.GetQuoteAsync(samuraiId, quoteId);
+                var quite = await _quoteRepository.GetQuoteAsync(id);
                 if (quite == null)
                 {
                     return NotFound();
@@ -89,7 +89,7 @@ namespace WebApi.Controllers
                 var samurai = await _context.Samurais.FirstOrDefaultAsync(s => s.Id == quoteEntity.SamuraiId);
 
                 return CreatedAtRoute("GetQuote", 
-                    new { samuraiId = quoteEntity.SamuraiId, quoteId = quoteEntity.Id },
+                    new { id = quoteEntity.Id },
                     _mapper.Map<QuoteOutPutModel>(quoteEntity));
                 
                 

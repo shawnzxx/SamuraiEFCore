@@ -18,20 +18,18 @@ namespace WebApi.Services
             this._context = context;
         }
 
-        public async Task<IEnumerable<Quote>> GetQuotesAsync(int samuraiId)
+        public async Task<IEnumerable<Quote>> GetQuotesAsync()
         {
             return await _context.Quotes
                 .Include(q => q.Samurai)
-                .Where(q => q.SamuraiId == samuraiId)
                 .ToListAsync();
         }
 
-        public async Task<Quote> GetQuoteAsync(int samuraiId, int quoteId)
+        public async Task<Quote> GetQuoteAsync(int id)
         {
             return await _context.Quotes
                 .Include(q => q.Samurai)
-                .Where(q => q.SamuraiId == samuraiId && q.Id == quoteId)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(q => q.Id == id);
         }
 
         public void Dispose()
@@ -65,6 +63,11 @@ namespace WebApi.Services
         {
             //return true if 1 or more entities were changed
             return (await _context.SaveChangesAsync() > 0);
+        }
+
+        public Task<IEnumerable<Quote>> GetQuotesAsync(IEnumerable<int> quoteIds)
+        {
+            throw new NotImplementedException();
         }
     }
 }
