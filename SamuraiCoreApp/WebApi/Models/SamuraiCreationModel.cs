@@ -3,9 +3,10 @@ using WebApi.Entities;
 
 namespace WebApi.Models
 {
-    public class SamuraiModel
+    public class SamuraiCreationModel
     {
         public string Name { get; set; }
+
         public List<Quote> Quotes { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,42 +21,47 @@ namespace WebApi.Controllers
         private readonly SamuraiContext _context;
         private readonly ILogger<SamuraisController> _logger;
         private readonly ISamuraiRepository _samuraiRepository;
+        private readonly IMapper _mapper;
 
-        public SamuraisController(SamuraiContext context, ILogger<SamuraisController> logger, ISamuraiRepository samuraiRepository)
+        public SamuraisController(SamuraiContext context, 
+            ILogger<SamuraisController> logger, 
+            ISamuraiRepository samuraiRepository,
+            IMapper mapper)
         {
-            this._context = context;
-            this._logger = logger;
-            this._samuraiRepository = samuraiRepository 
-                ?? throw new ArgumentNullException(nameof(samuraiRepository));
+            _context = context;
+            _logger = logger;
+            _samuraiRepository = samuraiRepository ?? throw new ArgumentNullException(nameof(samuraiRepository));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        // GET: api/Samurais
+        // GET: api/samurais
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Samurai>>> GetSamurais()
+        public async Task<ActionResult<SamuraiOutputModel[]>> GetSamurais()
         {
             try
             {
                 var samuraiEntities = await _samuraiRepository.GetSamuraisAsync();
-                return Ok(samuraiEntities);
+                return _mapper.Map<SamuraiOutputModel[]>(samuraiEntities);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failed");
+                return this.StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
 
-        // GET: api/Samurais/5
+        // GET: api/samurais/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Samurai>> GetSamuraiById(int id)
+        public async Task<ActionResult<SamuraiOutputModel>> GetSamuraiById(int id)
         {
             try
             {
-                var result = await _samuraiRepository.GetSamuraiAsync(id);
-                if (result == null)
+                var samurai = await _samuraiRepository.GetSamuraiAsync(id);
+                if (samurai == null)
                 {
                     return NotFound();
                 }
-                return Ok(result);
+                
+                return _mapper.Map<SamuraiOutputModel>(samurai);
             }
             catch (Exception)
             {
@@ -66,7 +72,7 @@ namespace WebApi.Controllers
 
         // POST: api/Samurais
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody]SamuraiModel input)
+        public async Task<IActionResult> Post([FromBody]SamuraiCreationModel input)
         {
             try
             {
@@ -95,7 +101,7 @@ namespace WebApi.Controllers
 
         // PUT: api/Samurais/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] SamuraiModel input)
+        public async Task<IActionResult> Put(int id, [FromBody] SamuraiCreationModel input)
         {
             var query = _context.Samurais.Where(s => s.Id == id);
             var result = await query.FirstOrDefaultAsync();

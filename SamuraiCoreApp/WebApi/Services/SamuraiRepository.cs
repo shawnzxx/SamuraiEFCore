@@ -46,7 +46,7 @@ namespace WebApi.Services
                 .ToListAsync();
         }
 
-        public async Task<Samurai> GetSamuraiAsync(int samuraiId)
+        public async Task<Samurai> GetSamuraiAsync(int id)
         {
             //some properties with quote count
             //result = await _context.Samurais
@@ -62,7 +62,7 @@ namespace WebApi.Services
 
             return await _context.Samurais
                 .Include(s=>s.Quotes)
-                .FirstOrDefaultAsync(s => s.Id == samuraiId);
+                .FirstOrDefaultAsync(s => s.Id == id);
         }
 
         public void Dispose()
