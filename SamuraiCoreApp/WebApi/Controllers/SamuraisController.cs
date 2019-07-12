@@ -77,8 +77,7 @@ namespace WebApi.Controllers
             try
             {
                 var samurai = new Samurai {
-                    Name = input.Name,
-                    Quotes = input.Quotes
+                    Name = input.Name
                 };
 
                 _context.Samurais.Add(samurai);
