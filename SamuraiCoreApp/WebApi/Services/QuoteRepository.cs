@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using WebApi.Contexts;
 using WebApi.Entities;
+using WebApi.Models;
 
 namespace WebApi.Services
 {
@@ -49,6 +50,21 @@ namespace WebApi.Services
                     _context = null;
                 }
             }
+        }
+
+        public void AddQuote(Quote quote)
+        {
+            if (quote == null) {
+                throw new ArgumentNullException(nameof(quote));
+            }
+
+            _context.Add(quote);
+        }
+
+        public async Task<bool> SaveChangeAsync()
+        {
+            //return true if 1 or more entities were changed
+            return (await _context.SaveChangesAsync() > 0);
         }
     }
 }

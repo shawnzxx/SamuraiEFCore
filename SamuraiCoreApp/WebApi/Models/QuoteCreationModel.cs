@@ -5,12 +5,9 @@ using System.Threading.Tasks;
 
 namespace WebApi.Models
 {
-    public class QuoteModel
+    public class QuoteCreationModel
     {
-        public int Id { get; set; }
-
+        public int SamuraiId { get; set; }
         public string Text { get; set; }
-        
-        public string SamuraiName { get; set; }
     }
 }

@@ -18,7 +18,7 @@ namespace WebApi.Filters
                 return;
             }
 
-            resultFromAction.Value = AutoMapper.Mapper.Map<QuoteModel>(resultFromAction.Value);
+            resultFromAction.Value = AutoMapper.Mapper.Map<QuoteOutPutModel>(resultFromAction.Value);
 
             await next();
         }

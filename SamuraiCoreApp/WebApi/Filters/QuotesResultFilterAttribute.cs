@@ -21,7 +21,7 @@ namespace WebApi.Filters
                 return;
             }
 
-            resultFromAction.Value = AutoMapper.Mapper.Map<IEnumerable<QuoteModel>>(resultFromAction.Value);
+            resultFromAction.Value = AutoMapper.Mapper.Map<IEnumerable<QuoteOutPutModel>>(resultFromAction.Value);
 
             await next();
         }

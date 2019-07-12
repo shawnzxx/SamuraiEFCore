@@ -12,8 +12,10 @@ namespace WebApi.Profiles
     {
         public QuotesProfile()
         {
-            CreateMap<Quote, QuoteModel>()
+            CreateMap<Quote, QuoteOutPutModel>()
                 .ForMember(dest => dest.SamuraiName, opt => opt.MapFrom(src => src.Samurai.Name));
+
+            CreateMap<QuoteCreationModel, Quote>();
         }
     }
 }

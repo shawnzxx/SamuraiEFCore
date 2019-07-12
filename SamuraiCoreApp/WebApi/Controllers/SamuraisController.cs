@@ -86,44 +86,6 @@ namespace WebApi.Controllers
             }
         }
 
-        //add new quotes
-        [HttpPost("{id}/quotes")]
-        public async Task<IActionResult> PostNewQuotes(int id, [FromBody] List<string> quotes)
-        {
-            try
-            {
-                //While EF is tracking the excisting object
-                var query = _context.Samurais.Where(s => s.Id == id);
-                var samurai = await query.FirstOrDefaultAsync();
-                if (samurai == null)
-                {
-                    return NotFound();
-                }
-                foreach (string quote in quotes)
-                {
-                    samurai.Quotes.Add(new Quote
-                    {
-                        Text = quote
-                    });
-                }
-
-                //EF is not tracking excisting object
-                //var quote = new Quote
-                //{
-                //    Text = "Now that I saved you, will you feed me dinner?",
-                //    SamuraiId = id
-                //};
-                //await _context.Quotes.AddAsync(quote);
-
-                await _context.SaveChangesAsync();
-                return Ok();
-            }
-            catch (Exception)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failed");
-            }
-        }
-
         private async Task SingleInsert()
         {
             var samurai = new Samurai { Name = "Shawnzxx" };
