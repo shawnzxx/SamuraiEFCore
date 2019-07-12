@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Entities;
+using WebApi.Filters;
 using WebApi.Models;
 using WebApi.Services;
 
@@ -24,6 +25,7 @@ namespace WebApi.Controllers
         }
 
         [HttpPost]
+        [QuotesResultFilter]
         public async Task<IActionResult> CreateQuoteCollection([FromBody] IEnumerable<QuoteCreationModel> quoteCollection) {
             var quoteEntities = _mapper.Map<IEnumerable<Quote>>(quoteCollection);
 
@@ -34,16 +36,29 @@ namespace WebApi.Controllers
 
             await _quoteRepository.SaveChangeAsync();
 
-            return Ok();
+            var quotesToReturn = await _quoteRepository.GetQuotesAsync(
+                quoteEntities.Select(q => q.Id).ToList());
+
+            var quoteIds = string.Join(",", quotesToReturn.Select(q => q.Id));
+
+            return CreatedAtRoute("GetQuoteCollections",
+                new { quoteIds = quoteIds },
+                quotesToReturn);
         }
 
         //api/quotecollections/(id1, id2, id3, ...)
         [HttpGet]
-        [Route("({quoteIds})")]
+        [Route("({quoteIds})", Name = "GetQuoteCollections")]
+        [QuotesResultFilter]
         public async Task<IActionResult> GetQuoteCollections([ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<int> quoteIds)
         {
+            var quotesEntities = await _quoteRepository.GetQuotesAsync(quoteIds);
 
-            return Ok();
+            if (quoteIds.Count() != quotesEntities.Count()) {
+                return NoContent();
+            }
+
+            return Ok(quotesEntities);
         }
     }
 }

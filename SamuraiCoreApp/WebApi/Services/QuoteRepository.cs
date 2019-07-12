@@ -65,9 +65,10 @@ namespace WebApi.Services
             return (await _context.SaveChangesAsync() > 0);
         }
 
-        public Task<IEnumerable<Quote>> GetQuotesAsync(IEnumerable<int> quoteIds)
+        public async Task<IEnumerable<Quote>> GetQuotesAsync(IEnumerable<int> quoteIds)
         {
-            throw new NotImplementedException();
+            return await _context.Quotes.Where(q => quoteIds.Contains(q.Id))
+                .Include(q => q.Samurai).ToListAsync();
         }
     }
 }
