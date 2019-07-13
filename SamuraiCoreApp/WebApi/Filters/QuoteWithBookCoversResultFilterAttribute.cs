@@ -4,11 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WebApi.Models;
 
 namespace WebApi.Filters
 {
-    public class QuotesResultFilterAttribute : ResultFilterAttribute
+    public class QuoteWithBookCoversResultFilterAttribute : ResultFilterAttribute
     {
         public override async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
         {
@@ -21,7 +20,12 @@ namespace WebApi.Filters
                 return;
             }
 
-            resultFromAction.Value = AutoMapper.Mapper.Map<IEnumerable<QuoteModel>>(resultFromAction.Value);
+            //cast to Tuple object
+            var (quote, bookCovers) = ((Entities.Quote, IEnumerable<ExternalModels.BookCover>))resultFromAction.Value;
+
+            var mappedQuote = AutoMapper.Mapper.Map<Models.QuoteWithCoversModel>(quote);
+            AutoMapper.Mapper.Map(bookCovers, mappedQuote);
+            resultFromAction.Value = mappedQuote;
 
             await next();
         }

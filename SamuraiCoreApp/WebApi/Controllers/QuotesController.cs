@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using WebApi.Contexts;
 using WebApi.Entities;
+using WebApi.ExternalModels;
 using WebApi.Filters;
 using WebApi.Models;
 using WebApi.Services;
@@ -56,7 +57,7 @@ namespace WebApi.Controllers
 
         // GET: api/quotes/2
         [HttpGet]
-        [QuoteResultFilter]
+        [QuoteWithBookCoversResultFilter]
         [Route("{id}", Name ="GetQuote")]
         public async Task<IActionResult> GetQuote(int id)
         {
@@ -67,7 +68,23 @@ namespace WebApi.Controllers
                 {
                     return NotFound();
                 }
-                return Ok(quoteEntity);
+
+                //test with get single bookcover request
+                //var bookCover = await _quoteRepository.GetBookCoverTestAsync(quoteEntity.Text);
+
+                //get set of bookcovers from api
+                var exBookCovers = await _quoteRepository.GetBookCoversAsync(id);
+
+                //old way for propertyBag
+                //var propertyBag = new Tuple<Quote, IEnumerable<BookCover>>(quoteEntity, bookCovers);
+                //var itsm1 = propertyBag.Item1;
+                //var itsm2 = propertyBag.Item2;
+
+                //way 2
+                //(Quote book, IEnumerable<BookCover> bookCovers) propertyBag = (quoteEntity, bookCovers);
+
+                //way 3 just return external model return and entity return to the QuoteWithBookCoversResultFilter to handle
+                return Ok((quoteEntity, exBookCovers));
             }
             catch (Exception)
             {
@@ -90,7 +107,7 @@ namespace WebApi.Controllers
 
                 return CreatedAtRoute("GetQuote", 
                     new { id = quoteEntity.Id },
-                    _mapper.Map<QuoteOutPutModel>(quoteEntity));
+                    _mapper.Map<QuoteModel>(quoteEntity));
                 
                 
             }

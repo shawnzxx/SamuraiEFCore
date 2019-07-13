@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebApi.Models
 {
-    public class QuoteOutPutModel
+    public class QuoteModel
     {
         public int Id { get; set; }
 

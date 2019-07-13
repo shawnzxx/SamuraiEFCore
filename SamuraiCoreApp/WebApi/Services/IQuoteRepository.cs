@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebApi.Entities;
+using WebApi.ExternalModels;
 using WebApi.Models;
 
 namespace WebApi.Services
@@ -20,6 +21,10 @@ namespace WebApi.Services
  
         void AddQuote(Quote quote);
         Task<bool> SaveChangeAsync();
+
+        Task<BookCover> GetBookCoverTestAsync(string anyText);
+
+        Task<IEnumerable<BookCover>> GetBookCoversAsync(int quoteId);
 
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace WebApi.Models
 {
-    public class SamuraiOutputModel
+    public class SamuraiModel
     {
         public int Id { get; set; }
 
@@ -11,6 +11,6 @@ namespace WebApi.Models
 
         public int QuoteCounts { get; set; }
 
-        public List<QuoteOutPutModel> Quotes { get; set; }
+        public List<QuoteModel> Quotes { get; set; }
     }
 }

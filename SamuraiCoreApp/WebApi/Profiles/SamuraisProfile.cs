@@ -12,7 +12,7 @@ namespace WebApi.Profiles
     {
         public SamuraisProfile()
         {
-            CreateMap<Samurai, SamuraiOutputModel>()
+            CreateMap<Samurai, SamuraiModel>()
                 .ForMember(dest => dest.QuoteCounts, opt => opt.MapFrom(src => src.Quotes.Count));
 
 

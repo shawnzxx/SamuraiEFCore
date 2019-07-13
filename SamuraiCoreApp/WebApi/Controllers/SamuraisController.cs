@@ -41,7 +41,7 @@ namespace WebApi.Controllers
             try
             {
                 var samuraiEntities = await _samuraiRepository.GetSamuraisAsync();
-                return Ok(_mapper.Map<SamuraiOutputModel[]>(samuraiEntities));
+                return Ok(_mapper.Map<SamuraiModel[]>(samuraiEntities));
             }
             catch (Exception ex)
             {
@@ -61,7 +61,7 @@ namespace WebApi.Controllers
                     return NotFound();
                 }
 
-                return Ok(_mapper.Map<SamuraiOutputModel>(samurai));
+                return Ok(_mapper.Map<SamuraiModel>(samurai));
             }
             catch (Exception)
             {
