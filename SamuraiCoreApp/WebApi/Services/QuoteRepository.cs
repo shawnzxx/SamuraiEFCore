@@ -118,12 +118,26 @@ namespace WebApi.Services
             var bookCoverUrls = new[]
             {
                 $"https://localhost:5001/api/bookcovers/{quoteId}-dummycover1",
-                $"https://localhost:5001/api/bookcovers/{quoteId}-dummycover2?returnFault=true",
+                //$"https://localhost:5001/api/bookcovers/{quoteId}-dummycover2?returnFault=true",
                 $"https://localhost:5001/api/bookcovers/{quoteId}-dummycover3",
                 $"https://localhost:5001/api/bookcovers/{quoteId}-dummycover4",
                 $"https://localhost:5001/api/bookcovers/{quoteId}-dummycover5"
             };
 
+            //execute tasks one by one in order
+            //foreach (var bookCoverUrl in bookCoverUrls)
+            //{
+            //    var response = await httpClient
+            //       .GetAsync(bookCoverUrl);
+
+            //    if (response.IsSuccessStatusCode)
+            //    {
+            //        bookCovers.Add(JsonConvert.DeserializeObject<BookCover>(
+            //            await response.Content.ReadAsStringAsync()));
+            //    }
+            //}
+
+            //execute tasks in parallel
             //create tasks, task haven't start yet, this is IEnumerable<Task<BookCover>> type
             var downloadBookCoverTasksQuery =
                 from bookCoverUrl
@@ -131,14 +145,15 @@ namespace WebApi.Services
                 select DownloadBookCoverAsync(httpClient, bookCoverUrl, _cancellationTokenSource.Token);
 
             //start tasks, this is List<Task<BookCover>> type
-            //use which one? https://stackoverflow.com/questions/3628425/ienumerable-vs-list-what-to-use-how-do-they-work
             //var downloadBookCoverTasks = downloadBookCoverTasksQuery.ToList();
 
-            //or start tasks
+            //or start tasks without convert to list
+            //use which one? https://stackoverflow.com/questions/3628425/ienumerable-vs-list-what-to-use-how-do-they-work
             try
             {
                 return await Task.WhenAll(downloadBookCoverTasksQuery);
             }
+            //based on cancellation exception we can log cancel reason and task status in detail
             catch (OperationCanceledException operationCanceledException)
             {
                 _logger.LogInformation($"{operationCanceledException.Message}");
@@ -168,6 +183,7 @@ namespace WebApi.Services
                 var bookCover = JsonConvert.DeserializeObject<BookCover>(json);
                 return bookCover;
             }
+            //if any task failed cancel tasks to free up threads
             _cancellationTokenSource.Cancel();
             
             return null;
