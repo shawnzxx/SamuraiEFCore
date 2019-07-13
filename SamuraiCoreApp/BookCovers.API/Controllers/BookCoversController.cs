@@ -23,7 +23,7 @@ namespace BookCovers.API.Controllers
 
             // generate a "book cover" (byte array) between 2 and 10MB
             var random = new Random();
-            int fakeCoverBytes = random.Next(2097152, 10485760);
+            int fakeCoverBytes = random.Next(16000000, 80000000);
             byte[] fakeCover = new byte[fakeCoverBytes];
             random.NextBytes(fakeCover);
 

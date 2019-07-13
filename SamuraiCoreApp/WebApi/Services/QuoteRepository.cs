@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using WebApi.Contexts;
 using WebApi.Entities;
@@ -15,12 +17,16 @@ namespace WebApi.Services
     public class QuoteRepository : IQuoteRepository
     {
         private SamuraiContext _context;
-        private readonly IHttpClientFactory _httpClientFactory;
+        private IHttpClientFactory _httpClientFactory;
+        private readonly ILogger<QuoteRepository> _logger;
+        private CancellationTokenSource _cancellationTokenSource;
 
-        public QuoteRepository(SamuraiContext context, IHttpClientFactory httpClientFactory)
+        public QuoteRepository(SamuraiContext context, IHttpClientFactory httpClientFactory, ILogger<QuoteRepository> logger)
         {
-            this._context = context;
-            this._httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+            _context = context;
+            _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _cancellationTokenSource = new CancellationTokenSource();
         }
 
         public async Task<IEnumerable<Quote>> GetQuotesAsync()
@@ -51,6 +57,11 @@ namespace WebApi.Services
                 {
                     _context.Dispose();
                     _context = null;
+                }
+                if (_cancellationTokenSource != null)
+                {
+                    _cancellationTokenSource.Dispose();
+                    _cancellationTokenSource = null;
                 }
             }
         }
@@ -100,31 +111,67 @@ namespace WebApi.Services
         public async Task<IEnumerable<BookCover>> GetBookCoversAsync(int quoteId)
         {
             var httpClient = _httpClientFactory.CreateClient();
-
             var bookCovers = new List<BookCover>();
+            
 
             //create a list of fake bookcovers request urls
             var bookCoverUrls = new[]
             {
                 $"https://localhost:5001/api/bookcovers/{quoteId}-dummycover1",
-                $"https://localhost:5001/api/bookcovers/{quoteId}-dummycover2",
+                $"https://localhost:5001/api/bookcovers/{quoteId}-dummycover2?returnFault=true",
                 $"https://localhost:5001/api/bookcovers/{quoteId}-dummycover3",
                 $"https://localhost:5001/api/bookcovers/{quoteId}-dummycover4",
                 $"https://localhost:5001/api/bookcovers/{quoteId}-dummycover5"
             };
 
-            foreach (var url in bookCoverUrls)
+            //create tasks, task haven't start yet, this is IEnumerable<Task<BookCover>> type
+            var downloadBookCoverTasksQuery =
+                from bookCoverUrl
+                in bookCoverUrls
+                select DownloadBookCoverAsync(httpClient, bookCoverUrl, _cancellationTokenSource.Token);
+
+            //start tasks, this is List<Task<BookCover>> type
+            //use which one? https://stackoverflow.com/questions/3628425/ienumerable-vs-list-what-to-use-how-do-they-work
+            //var downloadBookCoverTasks = downloadBookCoverTasksQuery.ToList();
+
+            //or start tasks
+            try
             {
-                var response = await httpClient.GetAsync(url);
-
-                if (response.IsSuccessStatusCode) {
-                    var json = await response.Content.ReadAsStringAsync();
-                    var bookCover = JsonConvert.DeserializeObject<BookCover>(json);
-                    bookCovers.Add(bookCover);
-                }
+                return await Task.WhenAll(downloadBookCoverTasksQuery);
             }
+            catch (OperationCanceledException operationCanceledException)
+            {
+                _logger.LogInformation($"{operationCanceledException.Message}");
+                foreach (var task in downloadBookCoverTasksQuery)
+                {
+                    _logger.LogInformation($"Task {task.Id} has status {task.Status}");
+                }
 
-            return bookCovers;
+                //return empty list of BookCover
+                return new List<BookCover>();
+            }
+            catch (Exception exception) {
+                _logger.LogError($"{exception.Message}");
+                throw;
+            }
+        }
+
+        private async Task<BookCover> DownloadBookCoverAsync(HttpClient httpClient, string bookCoverUrl, CancellationToken cancellationToken)
+        {
+            //throw new Exception("Cannot download book cover, writer isn't finishing book fast enough.");
+
+            var response = await httpClient.GetAsync(bookCoverUrl, cancellationToken);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var bookCover = JsonConvert.DeserializeObject<BookCover>(json);
+                return bookCover;
+            }
+            _cancellationTokenSource.Cancel();
+            
+            return null;
+            
         }
     }
 }

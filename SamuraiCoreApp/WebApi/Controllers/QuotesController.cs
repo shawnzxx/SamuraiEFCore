@@ -86,9 +86,15 @@ namespace WebApi.Controllers
                 //way 3 just return external model return and entity return to the QuoteWithBookCoversResultFilter to handle
                 return Ok((quoteEntity, exBookCovers));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failed");
+                _logger.LogError($"{ex.Message}");
+
+                //don't thorw everything into the front end, use for production
+                //return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failed");
+
+                //thorw everything into the front end
+                throw;
             }
         }
 
