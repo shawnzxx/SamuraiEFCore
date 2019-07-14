@@ -14,7 +14,7 @@ using WebApi.Services;
 
 namespace WebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/samurais")]
     [ApiController] //What is ApiController attribute: https://www.strathweb.com/2018/02/exploring-the-apicontrollerattribute-and-its-features-for-asp-net-core-mvc-2-1/
     public class SamuraisController : ControllerBase
     {
@@ -23,8 +23,8 @@ namespace WebApi.Controllers
         private readonly ISamuraiRepository _samuraiRepository;
         private readonly IMapper _mapper;
 
-        public SamuraisController(SamuraiContext context, 
-            ILogger<SamuraisController> logger, 
+        public SamuraisController(SamuraiContext context,
+            ILogger<SamuraisController> logger,
             ISamuraiRepository samuraiRepository,
             IMapper mapper)
         {
@@ -36,26 +36,27 @@ namespace WebApi.Controllers
 
         // GET: api/samurais
         [HttpGet]
-        public async Task<IActionResult> GetSamurais()
+        public async Task<ActionResult<IEnumerable<SamuraiModel>>> GetSamurais()
         {
             try
             {
                 var samuraiEntities = await _samuraiRepository.GetSamuraisAsync();
-                return Ok(_mapper.Map<SamuraiModel[]>(samuraiEntities));
+                return Ok(_mapper.Map<IEnumerable<SamuraiModel>>(samuraiEntities));
             }
             catch (Exception ex)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                _logger.LogError($"{ex.Message}");
+                throw;
             }
         }
 
         // GET: api/samurais/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetSamuraiById(int id)
+        [HttpGet("{samuraiId}")]
+        public async Task<ActionResult<SamuraiModel>> GetSamurai(int samuraiId)
         {
             try
             {
-                var samurai = await _samuraiRepository.GetSamuraiAsync(id);
+                var samurai = await _samuraiRepository.GetSamuraiAsync(samuraiId);
                 if (samurai == null)
                 {
                     return NotFound();
@@ -63,31 +64,34 @@ namespace WebApi.Controllers
 
                 return Ok(_mapper.Map<SamuraiModel>(samurai));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failed");
+                _logger.LogError($"{ex.Message}");
+                throw;
             }
-            
+
         }
 
         // POST: api/Samurais
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody]SamuraiCreationModel input)
+        public async Task<ActionResult<SamuraiOnlyModel>> CreateSamurai([FromBody]SamuraiCreationModel input)
         {
             try
             {
-                var samurai = new Samurai {
+                var samurai = new Samurai
+                {
                     Name = input.Name
                 };
 
                 _context.Samurais.Add(samurai);
                 await _context.SaveChangesAsync();
 
-                return Ok();
+                return Ok(_mapper.Map<SamuraiOnlyModel>(samurai));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failed");
+                _logger.LogError($"{ex.Message}");
+                throw;
             }
         }
 
@@ -99,57 +103,99 @@ namespace WebApi.Controllers
         }
 
         // PUT: api/Samurais/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] SamuraiCreationModel input)
+        [HttpPut("{samuraiId}")]
+        public async Task<IActionResult> UpdateSamurai(int samuraiId, [FromBody] SamuraiUpdateModel samuraiForUpdate)
         {
-            var query = _context.Samurais.Where(s => s.Id == id);
-            var result = await query.FirstOrDefaultAsync();
-            if (result == null)
+            try
             {
-                return NotFound();
-            }
-            result.Name = input.Name;
-            await _context.SaveChangesAsync();
-            return Ok();
-        }
+                var samuraiEntity = await _samuraiRepository.GetSamuraiAsync(samuraiId);
+                if (samuraiEntity == null)
+                {
+                    return NotFound();
+                }
 
+                _mapper.Map(samuraiForUpdate, samuraiEntity);
+
+                //// update & save
+                _samuraiRepository.UpdateSamurai(samuraiEntity);
+                await _samuraiRepository.SaveChangesAsync();
+
+                // return the SamuraiUpdateModel
+                return Ok(_mapper.Map<SamuraiUpdateModel>(samuraiEntity));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{ex.Message}");
+                throw;
+            }
+        }
+        
+
+        /// <summary>
+        /// Other legacy actions, clean up later
+        /// </summary>
+        /// <returns></returns>
         // PUT: api/Samurais
         [HttpPut()]
-        public async Task<IActionResult> PutAll()
+        public async Task<IActionResult> UpdateSamurais()
         {
-            var samurais = _context.Samurais.ToList();
-            foreach (var s in samurais)
+            try
             {
-                s.Name += "_1";
+                var samurais = _context.Samurais.ToList();
+                foreach (var s in samurais)
+                {
+                    s.Name += "_1";
+                }
+                await _context.SaveChangesAsync();
+                return Ok();
             }
-            await _context.SaveChangesAsync();
-            return Ok();
+            catch (Exception ex)
+            {
+                _logger.LogError($"{ex.Message}");
+                throw;
+            }
+        }
+
+        // DELETE: api/Samurais/01
+        //Need to change to logical delete
+        [HttpDelete("{samuraiId}")]
+        public async Task<IActionResult> DeleteSamurai(int samuraiId)
+        {
+            try
+            {
+                var samuraiEntity = await _samuraiRepository.GetSamuraiAsync(samuraiId);
+                if (samuraiEntity == null)
+                {
+                    return NotFound();
+                }
+
+                _context.Samurais.Remove(samuraiEntity);
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{ex.Message}");
+                throw;
+            }
         }
 
         // Delete: api/Samurais?str=baba
         [HttpDelete()]
-        public async Task<IActionResult> DeleteMany([FromQuery]string str)
+        public async Task<IActionResult> DeleteSamurais([FromQuery]string str)
         {
-            var samurais = _context.Samurais.Where(s => s.Name.Contains(str));
-            _context.Samurais.RemoveRange(samurais);
-            await _context.SaveChangesAsync();
-            return Ok();
-        }
-
-        // DELETE: api/Samurais/01
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var query = _context.Samurais.Where(s => s.Id == id);
-            var result = await query.FirstOrDefaultAsync();
-            if (result == null)
+            try
             {
-                return NotFound();
+                var samurais = _context.Samurais.Where(s => s.Name.Contains(str));
+                _context.Samurais.RemoveRange(samurais);
+                await _context.SaveChangesAsync();
+                return Ok();
             }
-
-            _context.Samurais.Remove(result);
-            await _context.SaveChangesAsync();
-            return Ok();
+            catch (Exception ex)
+            {
+                _logger.LogError($"{ex.Message}");
+                throw;
+            }
         }
     }
 }

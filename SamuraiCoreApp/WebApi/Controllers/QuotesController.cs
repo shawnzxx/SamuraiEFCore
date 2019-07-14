@@ -18,7 +18,7 @@ using WebApi.Services;
 
 namespace WebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/quotes")]
     [ApiController]
     public class QuotesController : ControllerBase
     {
@@ -28,8 +28,8 @@ namespace WebApi.Controllers
         private readonly IQuoteRepository _quoteRepository;
         private readonly IMapper _mapper;
 
-        public QuotesController(SamuraiContext context, 
-            ILogger<SamuraisController> logger, 
+        public QuotesController(SamuraiContext context,
+            ILogger<SamuraisController> logger,
             IQuoteRepository quoteRepository,
             IMapper mapper)
         {
@@ -41,29 +41,30 @@ namespace WebApi.Controllers
 
         // GET: api/quotes
         [HttpGet]
-        [QuotesResultFilter]
-        public async Task<IActionResult> GetQuotes()
+        //[QuotesResultFilter]
+        public async Task<ActionResult<IEnumerable<QuoteModel>>> GetQuotes()
         {
             try
             {
                 var quoteEntities = await _quoteRepository.GetQuotesAsync();
-                return Ok(quoteEntities);
+                return Ok(_mapper.Map<IEnumerable<QuoteModel>>(quoteEntities));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failed");
+                _logger.LogError($"{ex.Message}");
+                throw;
             }
         }
 
         // GET: api/quotes/2
         [HttpGet]
         [QuoteWithBookCoversResultFilter]
-        [Route("{id}", Name ="GetQuote")]
-        public async Task<IActionResult> GetQuote(int id)
+        [Route("{quoteId}", Name = "GetQuote")]
+        public async Task<ActionResult<QuoteWithCoversModel>> GetQuote(int quoteId)
         {
             try
             {
-                var quoteEntity = await _quoteRepository.GetQuoteAsync(id);
+                var quoteEntity = await _quoteRepository.GetQuoteAsync(quoteId);
                 if (quoteEntity == null)
                 {
                     return NotFound();
@@ -73,7 +74,7 @@ namespace WebApi.Controllers
                 //var bookCover = await _quoteRepository.GetBookCoverTestAsync(quoteEntity.Text);
 
                 //get set of bookcovers from api
-                var exBookCovers = await _quoteRepository.GetBookCoversAsync(id);
+                var exBookCovers = await _quoteRepository.GetBookCoversAsync(quoteId);
 
                 //old way for propertyBag
                 //var propertyBag = new Tuple<Quote, IEnumerable<BookCover>>(quoteEntity, bookCovers);
@@ -99,7 +100,7 @@ namespace WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateQuote ([FromBody] QuoteCreationModel quote)
+        public async Task<IActionResult> CreateQuote([FromBody] QuoteCreationModel quote)
         {
             try
             {
@@ -111,15 +112,16 @@ namespace WebApi.Controllers
                 //fetch the samurai from the db for profle mapping to use
                 var samurai = await _context.Samurais.FirstOrDefaultAsync(s => s.Id == quoteEntity.SamuraiId);
 
-                return CreatedAtRoute("GetQuote", 
+                return CreatedAtRoute("GetQuote",
                     new { id = quoteEntity.Id },
                     _mapper.Map<QuoteModel>(quoteEntity));
-                
-                
+
+
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failed");
+                _logger.LogError($"{ex.Message}");
+                throw;
             }
         }
 
@@ -155,9 +157,10 @@ namespace WebApi.Controllers
         //        await _context.SaveChangesAsync();
         //        return Ok();
         //    }
-        //    catch (Exception)
+        //catch (Exception ex)
         //    {
-        //        return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failed");
+        //        _logger.LogError($"{ex.Message}");
+        //        throw;
         //    }
         //}
     }

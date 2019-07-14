@@ -117,11 +117,11 @@ namespace WebApi.Services
             //create a list of fake bookcovers request urls
             var bookCoverUrls = new[]
             {
-                $"https://localhost:5001/api/bookcovers/{quoteId}-dummycover1",
-                //$"https://localhost:5001/api/bookcovers/{quoteId}-dummycover2?returnFault=true",
-                $"https://localhost:5001/api/bookcovers/{quoteId}-dummycover3",
-                $"https://localhost:5001/api/bookcovers/{quoteId}-dummycover4",
-                $"https://localhost:5001/api/bookcovers/{quoteId}-dummycover5"
+                $"https://localhost:6001/api/bookcovers/{quoteId}-dummycover1",
+                //$"https://localhost:6001/api/bookcovers/{quoteId}-dummycover2?returnFault=true",
+                $"https://localhost:6001/api/bookcovers/{quoteId}-dummycover3",
+                $"https://localhost:6001/api/bookcovers/{quoteId}-dummycover4",
+                $"https://localhost:6001/api/bookcovers/{quoteId}-dummycover5"
             };
 
             //execute tasks one by one in order

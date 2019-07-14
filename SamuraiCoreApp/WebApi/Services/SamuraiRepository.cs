@@ -65,6 +65,12 @@ namespace WebApi.Services
                 .FirstOrDefaultAsync(s => s.Id == id);
         }
 
+        public async Task<bool> SaveChangesAsync()
+        {
+            // return true if 1 or more entities were changed
+            return (await _context.SaveChangesAsync() > 0);
+        }
+
         public void Dispose()
         {
             Dispose(true);
@@ -81,6 +87,17 @@ namespace WebApi.Services
                     _context = null;
                 }
             }
+        }
+
+        public void UpdateSamurai(Samurai samuraiEntity)
+        {
+            // no code in this implementation
+        }
+
+        //need logical delete not phsical delete
+        public void RemoveSamurai(Samurai samuraiEntity)
+        {
+            // no code in this implementation
         }
     }
 }

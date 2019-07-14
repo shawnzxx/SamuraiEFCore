@@ -23,11 +23,6 @@ namespace WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
-            });
-
             services
                 .AddMvc()
                 .AddJsonOptions(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
@@ -38,7 +33,8 @@ namespace WebApi
             // it's better to store the connection string in an environment variable)
             // Everytime I use SamuraiContext the commands that it execute on the database will be output to the console windows
             var connection = Configuration.GetConnectionString("SamuraiConnection");
-            services.AddDbContext<SamuraiContext>(optionsBuilder => {
+            services.AddDbContext<SamuraiContext>(optionsBuilder =>
+            {
                 optionsBuilder
                 .EnableSensitiveDataLogging(true)
                 .UseSqlServer(connection); // use "SqlServer" provider with connection string
@@ -50,6 +46,16 @@ namespace WebApi
             services.AddAutoMapper();
 
             services.AddHttpClient();
+
+            services.AddSwaggerGen(setupAction =>
+            {
+                setupAction.SwaggerDoc("SamuraiOpenAPISpecification",
+                    new Microsoft.OpenApi.Models.OpenApiInfo()
+                    {
+                        Title = "Samurai API",
+                        Version = "1"
+                    });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -66,15 +72,11 @@ namespace WebApi
             }
 
             app.UseHttpsRedirection();
-            app.UseMvc();
 
+            //we add at back of UseHttpsRedirection, so that all link to swagger website using http will redirect to https site
             app.UseSwagger();
 
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-            });
-
+            app.UseMvc();
         }
     }
 }
