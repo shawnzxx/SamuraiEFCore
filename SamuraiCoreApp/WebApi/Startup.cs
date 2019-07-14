@@ -6,6 +6,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
+using System;
+using System.IO;
+using System.Reflection;
 using WebApi.Contexts;
 using WebApi.Services;
 
@@ -53,8 +56,23 @@ namespace WebApi
                     new Microsoft.OpenApi.Models.OpenApiInfo()
                     {
                         Title = "Samurai API",
-                        Version = "1"
+                        Version = "1.0",
+                        Description = "Through this API you can access samurais and their quotes",
+                        Contact = new Microsoft.OpenApi.Models.OpenApiContact() {
+                            Email = "shawn.zhang@avanade.com",
+                            Name = "Shawn Zhang",
+                            Url = new Uri("https://www.linkedin.com/in/shawnzxx/")
+                        },
+                        License = new Microsoft.OpenApi.Models.OpenApiLicense() {
+                            Name = "MIT License",
+                            Url = new Uri("https://opensource.org/licenses/MIT")
+                        }
                     });
+
+                var xmlCommentsFileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlCommentsFileFullPath = Path.Combine(AppContext.BaseDirectory, xmlCommentsFileName);
+
+                setupAction.IncludeXmlComments(xmlCommentsFileFullPath);
             });
         }
 
@@ -75,7 +93,14 @@ namespace WebApi
 
             //we add at back of UseHttpsRedirection, so that all link to swagger website using http will redirect to https site
             app.UseSwagger();
-
+            app.UseSwaggerUI(setupAction =>
+            {
+                setupAction.SwaggerEndpoint(
+                    "/swagger/SamuraiOpenAPISpecification/swagger.json", 
+                    "Samurai API");
+                setupAction.RoutePrefix = "";
+            });
+            
             app.UseMvc();
         }
     }

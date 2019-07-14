@@ -18,9 +18,6 @@ namespace WebApi.Profiles
             CreateMap<SamuraiCreationModel, Samurai>();
 
             CreateMap<SamuraiUpdateModel, Samurai>()
-                //ignore SamuraiUpdateModel.Id mapping, if pass in Id is empty(default will set to 0) or other values (2,3,4)
-                //Samurai.Id is primary key we don't want to chnage its original value
-                .ForMember(src => src.Id, opt => opt.Ignore())
                 .ReverseMap();
         }
     }

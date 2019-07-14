@@ -49,7 +49,12 @@ namespace WebApi.Controllers
                 throw;
             }
         }
-
+        
+        /// <summary>
+        /// Get Samurai by his/her samuraiId
+        /// </summary>
+        /// <param name="samuraiId">The id of samurai you want to get</param>
+        /// <returns>An ActionResult of type SamuraiModel</returns>
         // GET: api/samurais/5
         [HttpGet("{samuraiId}")]
         public async Task<ActionResult<SamuraiModel>> GetSamurai(int samuraiId)
@@ -102,9 +107,15 @@ namespace WebApi.Controllers
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Update sumurai name by using samuraiId
+        /// </summary>
+        /// <param name="samuraiId">The id of samurai you want to update</param>
+        /// <param name="samuraiForUpdate">SamuraiUpdateModel json object you want to update</param>
+        /// <returns></returns>
         // PUT: api/Samurais/5
         [HttpPut("{samuraiId}")]
-        public async Task<IActionResult> UpdateSamurai(int samuraiId, [FromBody] SamuraiUpdateModel samuraiForUpdate)
+        public async Task<ActionResult<SamuraiModel>> UpdateSamurai(int samuraiId, [FromBody] SamuraiUpdateModel samuraiForUpdate)
         {
             try
             {
@@ -121,7 +132,7 @@ namespace WebApi.Controllers
                 await _samuraiRepository.SaveChangesAsync();
 
                 // return the SamuraiUpdateModel
-                return Ok(_mapper.Map<SamuraiUpdateModel>(samuraiEntity));
+                return Ok(_mapper.Map<SamuraiModel>(samuraiEntity));
             }
             catch (Exception ex)
             {
