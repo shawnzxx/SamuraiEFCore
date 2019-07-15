@@ -8,9 +8,11 @@ using WebApi.Entities;
 using WebApi.Filters;
 using WebApi.Models;
 using WebApi.Services;
+using Microsoft.AspNetCore.Http;
 
 namespace WebApi.Controllers
 {
+    [Produces("application/json", "application/xml")]
     [Route("api/[controller]")]
     [ApiController]
     public class QuoteCollectionsController : ControllerBase
@@ -24,9 +26,15 @@ namespace WebApi.Controllers
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
+        /// <summary>
+        /// Add list of quotes to the sepecific samurai
+        /// </summary>
+        /// <param name="quoteCollection">quoteCollection model</param>
+        /// <returns></returns>
         [HttpPost]
         [QuotesResultFilter]
-        public async Task<IActionResult> CreateQuoteCollection([FromBody] IEnumerable<QuoteCreationModel> quoteCollection) {
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public async Task<ActionResult<IEnumerable<Quote>>> CreateQuoteCollection([FromBody] IEnumerable<QuoteCreationModel> quoteCollection) {
             var quoteEntities = _mapper.Map<IEnumerable<Quote>>(quoteCollection);
 
             foreach (var quoteEntity in quoteEntities)
@@ -47,10 +55,17 @@ namespace WebApi.Controllers
         }
 
         //api/quotecollections/(id1, id2, id3, ...)
+        /// <summary>
+        /// Get quotes collections
+        /// </summary>
+        /// <param name="quoteIds">Passing in quote ids as (id1, id2, id3, ...)</param>
+        /// <returns>Return list of quites</returns>
         [HttpGet]
         [Route("({quoteIds})", Name = "GetQuoteCollections")]
         [QuotesResultFilter]
-        public async Task<IActionResult> GetQuoteCollections([ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<int> quoteIds)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<ActionResult<IEnumerable<Quote>>> GetQuoteCollections([ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<int> quoteIds)
         {
             var quotesEntities = await _quoteRepository.GetQuotesAsync(quoteIds);
 

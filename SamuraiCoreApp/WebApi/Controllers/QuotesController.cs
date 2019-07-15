@@ -18,28 +18,37 @@ using WebApi.Services;
 
 namespace WebApi.Controllers
 {
+    [Produces("application/json", "application/xml")]
     [Route("api/quotes")]
     [ApiController]
     public class QuotesController : ControllerBase
     {
 
-        private readonly SamuraiContext _context;
-        private readonly ILogger<SamuraisController> _logger;
-        private readonly IQuoteRepository _quoteRepository;
-        private readonly IMapper _mapper;
+        private SamuraiContext _context;
+        private ILogger<SamuraisController> _logger;
+        private ISamuraiRepository _samuraiRepository;
+        private IQuoteRepository _quoteRepository;
+        private IMapper _mapper;
 
         public QuotesController(SamuraiContext context,
             ILogger<SamuraisController> logger,
             IQuoteRepository quoteRepository,
+            ISamuraiRepository samuraiRepository,
             IMapper mapper)
         {
             _context = context;
             _logger = logger;
+            _samuraiRepository = samuraiRepository ?? throw new ArgumentNullException(nameof(samuraiRepository));
             _quoteRepository = quoteRepository ?? throw new ArgumentNullException(nameof(quoteRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
+        /// <summary>
+        /// Get full list of quotes
+        /// </summary>
+        /// <returns>Full list of quites in database</returns>
         // GET: api/quotes
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpGet]
         //[QuotesResultFilter]
         public async Task<ActionResult<IEnumerable<QuoteModel>>> GetQuotes()
@@ -56,10 +65,17 @@ namespace WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Get quote by quiteId
+        /// </summary>
+        /// <param name="quoteId">Id of quote</param>
+        /// <returns>return requested quote</returns>
         // GET: api/quotes/2
         [HttpGet]
         [QuoteWithBookCoversResultFilter]
         [Route("{quoteId}", Name = "GetQuote")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<QuoteWithCoversModel>> GetQuote(int quoteId)
         {
             try
@@ -99,21 +115,36 @@ namespace WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Create a new quote with specific samurai
+        /// </summary>
+        /// <param name="quoteCreationModel">The quote to create</param>
+        /// <returns>An ActionResult of type Book</returns>
+        /// /// <response code="422">Validation error</response>
         [HttpPost]
-        public async Task<IActionResult> CreateQuote([FromBody] QuoteCreationModel quote)
+        [Consumes("application/json")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        //[ProducesResponseType(StatusCodes.Status422UnprocessableEntity,
+        //    Type = typeof(Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary))]
+        public async Task<ActionResult<QuoteModel>> CreateQuote([FromBody] QuoteCreationModel quoteCreationModel)
         {
             try
             {
-                var quoteEntity = _mapper.Map<Quote>(quote);
+                //fetch the samurai from the db for profle mapping to use
+                var samurai = await _samuraiRepository.GetSamuraiAsync(quoteCreationModel.SamuraiId);
+                if (samurai == null)
+                {
+                    return NotFound();
+                }
+
+                var quoteEntity = _mapper.Map<Quote>(quoteCreationModel);
                 _quoteRepository.AddQuote(quoteEntity);
 
                 await _quoteRepository.SaveChangeAsync();
 
-                //fetch the samurai from the db for profle mapping to use
-                var samurai = await _context.Samurais.FirstOrDefaultAsync(s => s.Id == quoteEntity.SamuraiId);
-
                 return CreatedAtRoute("GetQuote",
-                    new { id = quoteEntity.Id },
+                    new { quoteId = quoteEntity.Id },
                     _mapper.Map<QuoteModel>(quoteEntity));
 
 

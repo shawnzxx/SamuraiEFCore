@@ -14,6 +14,7 @@ using WebApi.Services;
 
 namespace WebApi.Controllers
 {
+    [Produces("application/json", "application/xml")] //Produce define Accept header type
     [Route("api/samurais")]
     [ApiController] //What is ApiController attribute: https://www.strathweb.com/2018/02/exploring-the-apicontrollerattribute-and-its-features-for-asp-net-core-mvc-2-1/
     public class SamuraisController : ControllerBase
@@ -34,7 +35,12 @@ namespace WebApi.Controllers
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
+        /// <summary>
+        /// Get all samurai collections
+        /// </summary>
+        /// <returns>Return all list of Samurais</returns>
         // GET: api/samurais
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SamuraiModel>>> GetSamurais()
         {
@@ -49,14 +55,18 @@ namespace WebApi.Controllers
                 throw;
             }
         }
-        
+
         /// <summary>
         /// Get Samurai by his/her samuraiId
         /// </summary>
         /// <param name="samuraiId">The id of samurai you want to get</param>
         /// <returns>An ActionResult of type SamuraiModel</returns>
+        /// <response code="200">Return the requested Samurai</response>
         // GET: api/samurais/5
-        [HttpGet("{samuraiId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [HttpGet]
+        [Route("{samuraiId}", Name = "GetSamurai")]
         public async Task<ActionResult<SamuraiModel>> GetSamurai(int samuraiId)
         {
             try
@@ -77,21 +87,27 @@ namespace WebApi.Controllers
 
         }
 
+        /// <summary>
+        /// Create a new samurai with his/her name
+        /// </summary>
+        /// <param name="samuraiCreationModel">passing in SamuraiCreationModel</param>
+        /// <returns>Return created Samurai</returns>
         // POST: api/Samurais
         [HttpPost]
-        public async Task<ActionResult<SamuraiOnlyModel>> CreateSamurai([FromBody]SamuraiCreationModel input)
+        [Consumes("application/json")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public async Task<ActionResult<SamuraiModel>> CreateSamurai([FromBody]SamuraiCreationModel samuraiCreationModel)
         {
             try
             {
-                var samurai = new Samurai
-                {
-                    Name = input.Name
-                };
+                var samuraiEntity = _mapper.Map<Samurai>(samuraiCreationModel);
 
-                _context.Samurais.Add(samurai);
+                _context.Samurais.Add(samuraiEntity);
                 await _context.SaveChangesAsync();
 
-                return Ok(_mapper.Map<SamuraiOnlyModel>(samurai));
+                return CreatedAtRoute("GetSamurai",
+                    new { samuraiId = samuraiEntity.Id },
+                    _mapper.Map<SamuraiModel>(samuraiEntity));
             }
             catch (Exception ex)
             {
@@ -112,9 +128,12 @@ namespace WebApi.Controllers
         /// </summary>
         /// <param name="samuraiId">The id of samurai you want to update</param>
         /// <param name="samuraiForUpdate">SamuraiUpdateModel json object you want to update</param>
-        /// <returns></returns>
+        /// <returns>Return updated Samurai</returns>
         // PUT: api/Samurais/5
         [HttpPut("{samuraiId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<SamuraiModel>> UpdateSamurai(int samuraiId, [FromBody] SamuraiUpdateModel samuraiForUpdate)
         {
             try
@@ -143,7 +162,7 @@ namespace WebApi.Controllers
         
 
         /// <summary>
-        /// Other legacy actions, clean up later
+        /// Legacy actions: Update list of Samurais
         /// </summary>
         /// <returns></returns>
         // PUT: api/Samurais
@@ -167,9 +186,17 @@ namespace WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Legacy actions: Delete Samurai by it's samuraiId
+        /// </summary>
+        /// <param name="samuraiId">Id of Samurai</param>
+        /// <returns>200 sucess</returns>
         // DELETE: api/Samurais/01
         //Need to change to logical delete
         [HttpDelete("{samuraiId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> DeleteSamurai(int samuraiId)
         {
             try
@@ -191,13 +218,23 @@ namespace WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Legacy actions: Delete list of Samurais by passed in string which Samurai's name contained
+        /// </summary>
+        /// <param name="str">String match pattern which will matched with Samurai's name</param>
+        /// <returns>200 sucess</returns>
         // Delete: api/Samurais?str=baba
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpDelete()]
         public async Task<IActionResult> DeleteSamurais([FromQuery]string str)
         {
             try
             {
                 var samurais = _context.Samurais.Where(s => s.Name.Contains(str));
+                if (samurais == null) {
+                    return NotFound();
+                }
                 _context.Samurais.RemoveRange(samurais);
                 await _context.SaveChangesAsync();
                 return Ok();

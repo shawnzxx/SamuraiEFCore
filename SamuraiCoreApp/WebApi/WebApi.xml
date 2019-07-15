@@ -4,12 +4,61 @@
         <name>WebApi</name>
     </assembly>
     <members>
+        <member name="M:WebApi.Controllers.QuoteCollectionsController.CreateQuoteCollection(System.Collections.Generic.IEnumerable{WebApi.Models.QuoteCreationModel})">
+            <summary>
+            Add list of quotes to the sepecific samurai
+            </summary>
+            <param name="quoteCollection">quoteCollection model</param>
+            <returns></returns>
+        </member>
+        <member name="M:WebApi.Controllers.QuoteCollectionsController.GetQuoteCollections(System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Get quotes collections
+            </summary>
+            <param name="quoteIds">Passing in quote ids as (id1, id2, id3, ...)</param>
+            <returns>Return list of quites</returns>
+        </member>
+        <member name="M:WebApi.Controllers.QuotesController.GetQuotes">
+            <summary>
+            Get full list of quotes
+            </summary>
+            <returns>Full list of quites in database</returns>
+        </member>
+        <member name="M:WebApi.Controllers.QuotesController.GetQuote(System.Int32)">
+            <summary>
+            Get quote by quiteId
+            </summary>
+            <param name="quoteId">Id of quote</param>
+            <returns>return requested quote</returns>
+        </member>
+        <member name="M:WebApi.Controllers.QuotesController.CreateQuote(WebApi.Models.QuoteCreationModel)">
+            <summary>
+            Create a new quote with specific samurai
+            </summary>
+            <param name="quoteCreationModel">The quote to create</param>
+            <returns>An ActionResult of type Book</returns>
+            /// <response code="422">Validation error</response>
+        </member>
+        <member name="M:WebApi.Controllers.SamuraisController.GetSamurais">
+            <summary>
+            Get all samurai collections
+            </summary>
+            <returns>Return all list of Samurais</returns>
+        </member>
         <member name="M:WebApi.Controllers.SamuraisController.GetSamurai(System.Int32)">
             <summary>
             Get Samurai by his/her samuraiId
             </summary>
             <param name="samuraiId">The id of samurai you want to get</param>
             <returns>An ActionResult of type SamuraiModel</returns>
+            <response code="200">Return the requested Samurai</response>
+        </member>
+        <member name="M:WebApi.Controllers.SamuraisController.CreateSamurai(WebApi.Models.SamuraiCreationModel)">
+            <summary>
+            Create a new samurai with his/her name
+            </summary>
+            <param name="samuraiCreationModel">passing in SamuraiCreationModel</param>
+            <returns>Return created Samurai</returns>
         </member>
         <member name="M:WebApi.Controllers.SamuraisController.UpdateSamurai(System.Int32,WebApi.Models.SamuraiUpdateModel)">
             <summary>
@@ -17,13 +66,27 @@
             </summary>
             <param name="samuraiId">The id of samurai you want to update</param>
             <param name="samuraiForUpdate">SamuraiUpdateModel json object you want to update</param>
-            <returns></returns>
+            <returns>Return updated Samurai</returns>
         </member>
         <member name="M:WebApi.Controllers.SamuraisController.UpdateSamurais">
             <summary>
-            Other legacy actions, clean up later
+            Legacy actions: Update list of Samurais
             </summary>
             <returns></returns>
+        </member>
+        <member name="M:WebApi.Controllers.SamuraisController.DeleteSamurai(System.Int32)">
+            <summary>
+            Legacy actions: Delete Samurai by it's samuraiId
+            </summary>
+            <param name="samuraiId">Id of Samurai</param>
+            <returns>200 sucess</returns>
+        </member>
+        <member name="M:WebApi.Controllers.SamuraisController.DeleteSamurais(System.String)">
+            <summary>
+            Legacy actions: Delete list of Samurais by passed in string which Samurai's name contained
+            </summary>
+            <param name="str">String match pattern which will matched with Samurai's name</param>
+            <returns>200 sucess</returns>
         </member>
         <member name="P:WebApi.Models.BookCoverModel.Name">
             we don't want to expose returned byte[] object to front end caller
@@ -47,6 +110,16 @@
         <member name="P:WebApi.Models.QuoteModel.SamuraiName">
             <summary>
             The name of sumurai which linked to the current quote 
+            </summary>
+        </member>
+        <member name="T:WebApi.Models.SamuraiCreationModel">
+            <summary>
+            A SamuraiCreationModel with name property only
+            </summary>
+        </member>
+        <member name="P:WebApi.Models.SamuraiCreationModel.Name">
+            <summary>
+            The name of SamuraiCreationModel
             </summary>
         </member>
         <member name="T:WebApi.Models.SamuraiModel">
