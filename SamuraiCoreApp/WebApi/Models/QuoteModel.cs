@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace WebApi.Models
 {
     /// <summary>
-    /// A quote with id, text and samurai name
+    /// Quote front end output model
     /// </summary>
     public class QuoteModel
     {

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace WebApi.Models
 {
     /// <summary>
-    /// A samurai with Id, Name, total quote counts and list of QuoteModel
+    /// Samurai front end output model
     /// </summary>
     public class SamuraiModel
     {

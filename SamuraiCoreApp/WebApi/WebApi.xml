@@ -9,41 +9,48 @@
             Add list of quotes to the sepecific samurai
             </summary>
             <param name="quoteCollection">quoteCollection model</param>
-            <returns></returns>
+            <returns>List of quote been created</returns>
+            <response code="201">Return newly created quote</response>
         </member>
         <member name="M:WebApi.Controllers.QuoteCollectionsController.GetQuoteCollections(System.Collections.Generic.IEnumerable{System.Int32})">
             <summary>
-            Get quotes collections
+            Get quotes from id list
             </summary>
             <param name="quoteIds">Passing in quote ids as (id1, id2, id3, ...)</param>
-            <returns>Return list of quites</returns>
+            <returns>Return list of quotes</returns>
+            <response code="200">Return list of quotes</response>
+            <response code="204">No such quote in database</response>
         </member>
         <member name="M:WebApi.Controllers.QuotesController.GetQuotes">
             <summary>
-            Get full list of quotes
+            Get all quotes
             </summary>
-            <returns>Full list of quites in database</returns>
+            <returns>Return all quotes in db</returns>
+            <response code="200">Return all quotes in db</response>
         </member>
         <member name="M:WebApi.Controllers.QuotesController.GetQuote(System.Int32)">
             <summary>
-            Get quote by quiteId
+            Get quote by id
             </summary>
-            <param name="quoteId">Id of quote</param>
-            <returns>return requested quote</returns>
+            <param name="quoteId">Id of the quote</param>
+            <returns>Return requested quote</returns>
+            <response code="200">Return requested quote</response>
         </member>
         <member name="M:WebApi.Controllers.QuotesController.CreateQuote(WebApi.Models.QuoteCreationModel)">
             <summary>
-            Create a new quote with specific samurai
+            Create a new quote under specific samurai
             </summary>
             <param name="quoteCreationModel">The quote to create</param>
-            <returns>An ActionResult of type Book</returns>
-            /// <response code="422">Validation error</response>
+            <returns>Return newly created quote</returns>
+            <response code="200">Return newly created quote</response>
+            <response code="422">Validation error</response>
         </member>
         <member name="M:WebApi.Controllers.SamuraisController.GetSamurais">
             <summary>
             Get all samurai collections
             </summary>
             <returns>Return all list of Samurais</returns>
+            <response code="200">Return all list of Samurais</response>
         </member>
         <member name="M:WebApi.Controllers.SamuraisController.GetSamurai(System.Int32)">
             <summary>
@@ -59,6 +66,7 @@
             </summary>
             <param name="samuraiCreationModel">passing in SamuraiCreationModel</param>
             <returns>Return created Samurai</returns>
+            <response code="201">Return created Samurai</response>
         </member>
         <member name="M:WebApi.Controllers.SamuraisController.UpdateSamurai(System.Int32,WebApi.Models.SamuraiUpdateModel)">
             <summary>
@@ -67,6 +75,7 @@
             <param name="samuraiId">The id of samurai you want to update</param>
             <param name="samuraiForUpdate">SamuraiUpdateModel json object you want to update</param>
             <returns>Return updated Samurai</returns>
+            <response code="200">Return updated Samurai</response>
         </member>
         <member name="M:WebApi.Controllers.SamuraisController.UpdateSamurais">
             <summary>

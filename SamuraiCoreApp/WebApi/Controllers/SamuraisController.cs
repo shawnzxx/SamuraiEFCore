@@ -39,6 +39,7 @@ namespace WebApi.Controllers
         /// Get all samurai collections
         /// </summary>
         /// <returns>Return all list of Samurais</returns>
+        /// <response code="200">Return all list of Samurais</response>
         // GET: api/samurais
         [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpGet]
@@ -92,6 +93,7 @@ namespace WebApi.Controllers
         /// </summary>
         /// <param name="samuraiCreationModel">passing in SamuraiCreationModel</param>
         /// <returns>Return created Samurai</returns>
+        /// <response code="201">Return created Samurai</response>
         // POST: api/Samurais
         [HttpPost]
         [Consumes("application/json")]
@@ -129,8 +131,10 @@ namespace WebApi.Controllers
         /// <param name="samuraiId">The id of samurai you want to update</param>
         /// <param name="samuraiForUpdate">SamuraiUpdateModel json object you want to update</param>
         /// <returns>Return updated Samurai</returns>
+        /// <response code="200">Return updated Samurai</response>
         // PUT: api/Samurais/5
         [HttpPut("{samuraiId}")]
+        [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesDefaultResponseType]

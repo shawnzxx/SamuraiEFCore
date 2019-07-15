@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Http;
 namespace WebApi.Controllers
 {
     [Produces("application/json", "application/xml")]
-    [Route("api/[controller]")]
+    [Route("api/quoteCollections")]
     [ApiController]
     public class QuoteCollectionsController : ControllerBase
     {
@@ -30,11 +30,14 @@ namespace WebApi.Controllers
         /// Add list of quotes to the sepecific samurai
         /// </summary>
         /// <param name="quoteCollection">quoteCollection model</param>
-        /// <returns></returns>
+        /// <returns>List of quote been created</returns>
+        /// <response code="201">Return newly created quote</response>
         [HttpPost]
+        [Consumes("application/json")]
         [QuotesResultFilter]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        public async Task<ActionResult<IEnumerable<Quote>>> CreateQuoteCollection([FromBody] IEnumerable<QuoteCreationModel> quoteCollection) {
+        public async Task<ActionResult<IEnumerable<QuoteModel>>> CreateQuoteCollection([FromBody] IEnumerable<QuoteCreationModel> quoteCollection) {
+
             var quoteEntities = _mapper.Map<IEnumerable<Quote>>(quoteCollection);
 
             foreach (var quoteEntity in quoteEntities)
@@ -44,6 +47,7 @@ namespace WebApi.Controllers
 
             await _quoteRepository.SaveChangeAsync();
 
+            //get back list of quote id we just created
             var quotesToReturn = await _quoteRepository.GetQuotesAsync(
                 quoteEntities.Select(q => q.Id).ToList());
 
@@ -56,10 +60,12 @@ namespace WebApi.Controllers
 
         //api/quotecollections/(id1, id2, id3, ...)
         /// <summary>
-        /// Get quotes collections
+        /// Get quotes from id list
         /// </summary>
         /// <param name="quoteIds">Passing in quote ids as (id1, id2, id3, ...)</param>
-        /// <returns>Return list of quites</returns>
+        /// <returns>Return list of quotes</returns>
+        /// <response code="200">Return list of quotes</response>
+        /// <response code="204">No such quote in database</response>
         [HttpGet]
         [Route("({quoteIds})", Name = "GetQuoteCollections")]
         [QuotesResultFilter]

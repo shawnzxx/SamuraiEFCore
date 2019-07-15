@@ -1,30 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using WebApi.Contexts;
 using WebApi.Entities;
-using WebApi.ExternalModels;
 using WebApi.Filters;
 using WebApi.Models;
 using WebApi.Services;
 
-// For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace WebApi.Controllers
 {
+    //supoorted output
     [Produces("application/json", "application/xml")]
     [Route("api/quotes")]
     [ApiController]
     public class QuotesController : ControllerBase
     {
-
-        private SamuraiContext _context;
+        private readonly SamuraiContext _context;
         private ILogger<SamuraisController> _logger;
         private ISamuraiRepository _samuraiRepository;
         private IQuoteRepository _quoteRepository;
@@ -44,9 +40,11 @@ namespace WebApi.Controllers
         }
 
         /// <summary>
-        /// Get full list of quotes
+        /// Get all quotes
         /// </summary>
-        /// <returns>Full list of quites in database</returns>
+        /// <returns>Return all quotes in db</returns>
+        /// <response code="200">Return all quotes in db</response>
+        
         // GET: api/quotes
         [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpGet]
@@ -66,10 +64,11 @@ namespace WebApi.Controllers
         }
 
         /// <summary>
-        /// Get quote by quiteId
+        /// Get quote by id
         /// </summary>
-        /// <param name="quoteId">Id of quote</param>
-        /// <returns>return requested quote</returns>
+        /// <param name="quoteId">Id of the quote</param>
+        /// <returns>Return requested quote</returns>
+        /// <response code="200">Return requested quote</response>
         // GET: api/quotes/2
         [HttpGet]
         [QuoteWithBookCoversResultFilter]
@@ -107,20 +106,20 @@ namespace WebApi.Controllers
             {
                 _logger.LogError($"{ex.Message}");
 
-                //don't thorw everything into the front end, use for production
-                //return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failed");
+                //thorw full error stack page to front -- dev
+                throw; 
 
-                //thorw everything into the front end
-                throw;
+                //return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failed"); -- production
             }
         }
 
         /// <summary>
-        /// Create a new quote with specific samurai
+        /// Create a new quote under specific samurai
         /// </summary>
         /// <param name="quoteCreationModel">The quote to create</param>
-        /// <returns>An ActionResult of type Book</returns>
-        /// /// <response code="422">Validation error</response>
+        /// <returns>Return newly created quote</returns>
+        /// <response code="200">Return newly created quote</response>
+        /// <response code="422">Validation error</response>
         [HttpPost]
         [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -146,8 +145,6 @@ namespace WebApi.Controllers
                 return CreatedAtRoute("GetQuote",
                     new { quoteId = quoteEntity.Id },
                     _mapper.Map<QuoteModel>(quoteEntity));
-
-
             }
             catch (Exception ex)
             {
@@ -155,44 +152,6 @@ namespace WebApi.Controllers
                 throw;
             }
         }
-
-        ////add new quotes
-        //[HttpPost("quotes")]
-        //public async Task<IActionResult> PostNewQuotes(int id, [FromBody] List<string> quotes)
-        //{
-        //    try
-        //    {
-        //        //While EF is tracking the excisting object
-        //        var query = _context.Samurais.Where(s => s.Id == id);
-        //        var samurai = await query.FirstOrDefaultAsync();
-        //        if (samurai == null)
-        //        {
-        //            return NotFound();
-        //        }
-        //        foreach (string quote in quotes)
-        //        {
-        //            samurai.Quotes.Add(new Quote
-        //            {
-        //                Text = quote
-        //            });
-        //        }
-
-        //        //EF is not tracking excisting object
-        //        //var quote = new Quote
-        //        //{
-        //        //    Text = "Now that I saved you, will you feed me dinner?",
-        //        //    SamuraiId = id
-        //        //};
-        //        //await _context.Quotes.AddAsync(quote);
-
-        //        await _context.SaveChangesAsync();
-        //        return Ok();
-        //    }
-        //catch (Exception ex)
-        //    {
-        //        _logger.LogError($"{ex.Message}");
-        //        throw;
-        //    }
-        //}
+        
     }
 }

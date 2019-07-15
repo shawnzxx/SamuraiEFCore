@@ -4,7 +4,7 @@ using WebApi.Entities;
 namespace WebApi.Models
 {
     /// <summary>
-    /// A SamuraiCreationModel with name property only
+    /// samurai creation front end input model
     /// </summary>
     public class SamuraiCreationModel
     {

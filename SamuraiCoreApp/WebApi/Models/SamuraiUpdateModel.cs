@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace WebApi.Models
 {
     /// <summary>
-    /// A samurai for update with Name field
+    /// samurai update front end input model
     /// </summary>
     public class SamuraiUpdateModel
     {
