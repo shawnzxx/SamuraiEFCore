@@ -96,9 +96,9 @@ namespace WebApi
             services.AddScoped<ISamuraiRepository, SamuraiRepository>();
             services.AddScoped<IQuoteRepository, QuoteRepository>();
 
-            services.AddAutoMapper();
-
             services.AddHttpClient();
+
+            services.AddAutoMapper();
 
             services.AddSwaggerGen(setupAction =>
             {
@@ -131,27 +131,27 @@ namespace WebApi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            Console.WriteLine(env.EnvironmentName);
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+
+                //we add at back of UseHttpsRedirection, so that all link to swagger website using http will redirect to https site
+                app.UseSwagger();
+                app.UseSwaggerUI(setupAction =>
+                {
+                    setupAction.SwaggerEndpoint(
+                        "/swagger/SamuraiOpenAPISpecification/swagger.json",
+                        "Samurai API");
+                    setupAction.RoutePrefix = "";
+                });
             }
             else
             {
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
+                app.UseHttpsRedirection();
             }
-
-            app.UseHttpsRedirection();
-
-            //we add at back of UseHttpsRedirection, so that all link to swagger website using http will redirect to https site
-            app.UseSwagger();
-            app.UseSwaggerUI(setupAction =>
-            {
-                setupAction.SwaggerEndpoint(
-                    "/swagger/SamuraiOpenAPISpecification/swagger.json",
-                    "Samurai API");
-                setupAction.RoutePrefix = "";
-            });
 
             app.UseMvc();
         }
