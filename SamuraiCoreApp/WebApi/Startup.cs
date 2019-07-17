@@ -153,6 +153,14 @@ namespace WebApi
                 app.UseHttpsRedirection();
             }
 
+
+            //when app start migrate db, we no need in here
+            //using (var serviceScope = app.ApplicationServices.CreateScope())
+            //{
+            //    var context = serviceScope.ServiceProvider.GetService<SamuraiContext>();
+            //    context.Database.Migrate();
+            //}
+
             app.UseMvc();
         }
     }
