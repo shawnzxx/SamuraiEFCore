@@ -10,8 +10,8 @@ using WebApi.Contexts;
 namespace WebApi.Migrations
 {
     [DbContext(typeof(SamuraiContext))]
-    [Migration("20190717054157_Initial")]
-    partial class Initial
+    [Migration("20190718053027_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

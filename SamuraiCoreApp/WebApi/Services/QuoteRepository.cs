@@ -112,7 +112,7 @@ namespace WebApi.Services
         {
             var httpClient = _httpClientFactory.CreateClient();
             var bookCovers = new List<BookCover>();
-            
+
 
             //create a list of fake bookcovers request urls
             var bookCoverUrls = new[]
@@ -123,6 +123,16 @@ namespace WebApi.Services
                 $"https://localhost:6001/api/bookcovers/{quoteId}-dummycover4",
                 $"https://localhost:6001/api/bookcovers/{quoteId}-dummycover5"
             };
+
+            //Try contain bridge network
+            //var bookCoverUrls = new[]
+            //{
+            //    $"http://bookcoversapi:8081/api/bookcovers/{quoteId}-dummycover1",
+            //    $"http://bookcoversapi:8081/api/bookcovers/{quoteId}-dummycover2",
+            //    $"http://bookcoversapi:8081/api/bookcovers/{quoteId}-dummycover3",
+            //    $"http://bookcoversapi:8081/api/bookcovers/{quoteId}-dummycover4",
+            //    $"http://bookcoversapi:8081/api/bookcovers/{quoteId}-dummycover5"
+            //};
 
             //execute tasks one by one in order
             //foreach (var bookCoverUrl in bookCoverUrls)
